@@ -1,22 +1,39 @@
 import React from "react";
+import { useAuthContext } from "../../context/AuthContext";
+import useConversation from "../../zustand/useConversation";
 
-const Message = () => {
+const Message = ({ message }) => {
+  const { authUser } = useAuthContext();
+  const { selectedConversation } = useConversation();
+  const fromMe = message.senderId === authUser._id;
+  const chatClassName = fromMe ? "chat-end" : "chat-start";
+  const profilePic = fromMe
+    ? authUser.profilePic
+    : selectedConversation?.profilePic;
+  const bubbleBgColor = fromMe ? "bg-blue-500" : "";
+  const time = extractTime(message.createdAt);
   return (
-    <div className="chat chat-end">
+    <div className={`chat ${chatClassName}`}>
       <div className="chat-image avatar">
         <div className="w-10 rounded-full">
-          <img
-            src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-            alt="user avatar"
-          />
+          <img src={profilePic} alt="user avatar" />
         </div>
       </div>
-      <div className="chat-bubble text-white bg-blue-500">Hi! what is up?</div>
+      <div className={`chat-bubble text-white ${bubbleBgColor}`}>
+        {message.message}
+      </div>
       <div className="chat-footer opacity-50 text-xs flex gap-1 items-center text-white">
-        12:20
+        {time}
       </div>
     </div>
   );
 };
+
+function extractTime(timeStamp) {
+  const date = new Date(timeStamp);
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  return `${hours}: ${minutes}`;
+}
 
 export default Message;
